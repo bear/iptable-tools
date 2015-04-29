@@ -13,7 +13,15 @@ Flushes all rules, sets some sane defaults and then loops thru a rules config di
 
 Contains 2 helper functions:
 
-  inbound(port, network, protocol)
-  outbound(port, network, protocol)
+    inbound(port, network, protocol)
+    outbound(port, network, protocol)
+
+Network will default to the value of PUBLICNET (or eth0 if not found)
+Protocol will default to TCP
+Port is required and is not touched, so ranges are allowed
 
 This script does not save the rules, just in case you mess up ;)
+
+#### Examples
+- allow inbound SSH: ```inbound(22)```
+- allow outbound DHCP: ```outbound("67:68", ${PUBLICNET}, "udp")```

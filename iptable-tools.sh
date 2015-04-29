@@ -1,4 +1,11 @@
 #!/bin/bash
+#
+# Author:  bear (Mike Taylor)
+# Contact: bear@bear.im
+# License: MIT
+#
+# Copyright (c) 2015 by Mike Taylor'
+#
 
 # RULESDIR will default to /etc/iptables.d
 # PUBLICNET will default to eth0 unless you override it

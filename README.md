@@ -29,3 +29,11 @@ Generates a handy ascii box diagram that shows the iptable flow.
 
     ./iptable-tools.sh --reset --load
     ./iptable-tools.sh --check
+
+## Information
+
+    Author:  bear (Mike Taylor)
+    Contact: bear@bear.im
+    License: MIT
+
+    Copyright (c) 2015 by Mike Taylor'

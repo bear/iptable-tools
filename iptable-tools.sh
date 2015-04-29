@@ -14,6 +14,12 @@ else
   IPFOUND=""
 fi
 
+function check-iptables () {
+  if [ -z "${IPFOUND}" ]; then
+    echo "iptables binary not found, exiting"
+    exit 4
+  fi
+}
 # inbound(port, network, protocol)
 function inbound () {
   if [ -z "$1" ]; then
@@ -30,6 +36,8 @@ function inbound () {
   else
     INBOUNDPROTO=$3
   fi
+
+  check-iptables
 
   iptables -A INPUT  -i ${INBOUNDNET} -p ${INBOUNDPROTO} --dport $1 -m state --state NEW,ESTABLISHED -j ACCEPT
   iptables -A OUTPUT -o ${INBOUNDNET} -p ${INBOUNDPROTO} --sport $1 -m state --state ESTABLISHED     -j ACCEPT
@@ -52,6 +60,8 @@ function outbound () {
     INBOUNDPROTO=$3
   fi
 
+  check-iptables
+  
   iptables -A OUTPUT -o ${INBOUNDNET} -p ${INBOUNDPROTO} --dport $1 --state NEW,ESTABLISHED -j ACCEPT
   iptables -A INPUT  -i ${INBOUNDNET} -p ${INBOUNDPROTO} --sport $1 --state ESTABLISHED     -j ACCEPT
 }
@@ -60,6 +70,8 @@ function outbound () {
 function load-rules () {
   echo "loading rules"
 
+  check-iptables
+  
   if [ -z "$1" ]; then
     echo "rules path required"
     exit 2
@@ -75,6 +87,9 @@ function load-rules () {
 
 function check-rules () {
   echo "checking current rules against saved rules"
+
+  check-iptables
+  
   iptables-save | sed -e '/^[#:]/d' > /tmp/iptables.check
 
   if [ -e /tmp/itpables.check ]; then
@@ -98,6 +113,8 @@ function check-rules () {
 function reset-rules () {
   echo "resetting iptables rules to default DENY"
 
+  check-iptables
+  
   iptables  -F
 
   # Default policy is drop
@@ -129,11 +146,7 @@ function reset-rules () {
 DOLOAD=""
 DORESET=""
 DOCHECK=""
-
-if [ -z "${IPFOUND}" ]; then
-  echo "iptables binary not found, exiting"
-  exit 4
-fi
+DOFLOW=""
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -153,6 +166,10 @@ while [ $# -gt 0 ]; do
               DOCHECK="yes"
               shift
               ;;
+    --flow)
+              DOFLOW="yes"
+              shift
+              ;;
   esac
     shift
 done
@@ -170,4 +187,31 @@ if [ -n "${DOLOAD}" ]; then
 fi
 if [ -n "${DOCHECK}" ]; then
   check-rules
+fi
+
+if [ -n "${DOFLOW}" ]; then
+  cat << EOF
+
+          ┌──────────────┐
+        ┌─│   network    │◀┐
+        │ └──────────────┘ │
+        ▼                  │
+┌──────────────┐   ┌──────────────┐
+│  prerouting  │   │ postrouting  │
+└──────────────┘   └──────────────┘
+        │                  ▲
+        │   ┌──────────┐   │
+        ├──▶│ forward  │───┤
+        │   └──────────┘   │
+        ▼                  │
+┌──────────────┐   ┌──────────────┐
+│    input     │   │    output    │
+└──────────────┘   └──────────────┘
+        │                  ▲
+        │ ┌──────────────┐ │
+        └▶│   process    │─┘
+          └──────────────┘
+
+EOF
+  exit
 fi

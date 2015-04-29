@@ -39,6 +39,7 @@ function inbound () {
 
   check-iptables
 
+  echo "  defining inbound rule for port $1 ${INBOUNDPROTO} for ${INBOUNDNET}"
   iptables -A INPUT  -i ${INBOUNDNET} -p ${INBOUNDPROTO} --dport $1 -m state --state NEW,ESTABLISHED -j ACCEPT
   iptables -A OUTPUT -o ${INBOUNDNET} -p ${INBOUNDPROTO} --sport $1 -m state --state ESTABLISHED     -j ACCEPT
 }
@@ -62,6 +63,7 @@ function outbound () {
 
   check-iptables
   
+  echo "  defining outbound rule for port $1 ${INBOUNDPROTO} for ${INBOUNDNET}"
   iptables -A OUTPUT -o ${INBOUNDNET} -p ${INBOUNDPROTO} --dport $1 --state NEW,ESTABLISHED -j ACCEPT
   iptables -A INPUT  -i ${INBOUNDNET} -p ${INBOUNDPROTO} --sport $1 --state ESTABLISHED     -j ACCEPT
 }

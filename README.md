@@ -1,25 +1,31 @@
 ## iptable-tools
 
-A collection of scripts and tools to make dealing with iptables almost fun :)
+```iptable-tools.sh``` is a helper script that can perform the following functions:
 
-### iptable-flow.txt
-A handy diagram for those times when you just need a clue
+    ./iptable-tools.sh [--reset] [--load] [--check] [--flow]
 
-### iptable-check.sh
-Compares a cleaned-up output from iptables-save against the saved iptables.rules and lets you know if they are different
-
-### iptable-update.sh
+### --reset
 Flushes all rules, sets some sane defaults and then loops thru a rules config directory for any scripts.
 
-Contains 2 helper functions:
+### --load
+Scans the RULESDIR (default is /etc/iptable.d) for any scripts and loads them. Two helper functions are defined to make defining inbound and outbound rules easier:
 
-    inbound(port, network, protocol)
-    outbound(port, network, protocol)
+    inbound  port network protocol
+    outbound port network protocol
 
 The Network and Protocol parameters will default to the value of PUBLICNET (or eth0 if not found) and TCP, The Port parameter is required, but is not touched, so ranges are allowed.
 
 This script does not save the rules, just in case you mess up ;)
 
-#### Examples
-- allow inbound SSH: ```inbound(22)```
-- allow outbound DHCP: ```outbound("67:68", ${PUBLICNET}, "udp")```
+### --check
+Runs ```iptables-save``` and stores the output in /tmp/iptables.chec and then compares it to the saves rules in /etc/iptables.rules
+
+The saved output is cleaned up using ```sed``` to make the comparison using ```diff``` easier.
+
+### --flow
+Generates a handy ascii box diagram that shows the iptable flow.
+
+### Examples
+
+    ./iptable-tools.sh --reset --load
+    ./iptable-tools.sh --check

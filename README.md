@@ -1,5 +1,7 @@
 ## iptable-tools
 
+MIT Licensed and Copyright (c) 2015 by Mike Taylor
+
 ```iptable-tools.sh``` is a helper script that can perform the following functions:
 
     ./iptable-tools.sh [--reset] [--load] [--check] [--flow]
@@ -29,11 +31,3 @@ Generates a handy ascii box diagram that shows the iptable flow.
 
     ./iptable-tools.sh --reset --load
     ./iptable-tools.sh --check
-
-## Information
-
-    Author:  bear (Mike Taylor)
-    Contact: bear@bear.im
-    License: MIT
-
-    Copyright (c) 2015 by Mike Taylor'

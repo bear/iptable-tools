@@ -9,13 +9,13 @@
 
 # RULESDIR will default to /etc/iptables.d
 # PUBLICNET will default to eth0 unless you override it
-
+set -x
 RULESDIR="/etc/iptables.d"
 if [ -z "${PUBLICNET}" ]; then
   PUBLICNET="eth0"
 fi
 
-if hash iptables 2>/dev/null ; then 
+if hash iptables 2>/dev/null ; then
   IPFOUND="found"
 else
   IPFOUND=""
@@ -69,10 +69,10 @@ function outbound () {
   fi
 
   check-iptables
-  
+
   echo "  defining outbound rule for port $1 ${INBOUNDPROTO} for ${INBOUNDNET}"
-  iptables -A OUTPUT -o ${INBOUNDNET} -p ${INBOUNDPROTO} --dport $1 --state NEW,ESTABLISHED -j ACCEPT
-  iptables -A INPUT  -i ${INBOUNDNET} -p ${INBOUNDPROTO} --sport $1 --state ESTABLISHED     -j ACCEPT
+  iptables -A OUTPUT -o ${INBOUNDNET} -p ${INBOUNDPROTO} --dport $1 -m state --state NEW,ESTABLISHED -j ACCEPT
+  iptables -A INPUT  -i ${INBOUNDNET} -p ${INBOUNDPROTO} --sport $1 -m state --state ESTABLISHED     -j ACCEPT
 }
 
 # rules(path-to-rules-dir)
@@ -80,7 +80,7 @@ function load-rules () {
   echo "loading rules"
 
   check-iptables
-  
+
   if [ -z "$1" ]; then
     echo "rules path required"
     exit 2
@@ -98,7 +98,7 @@ function check-rules () {
   echo "checking current rules against saved rules"
 
   check-iptables
-  
+
   iptables-save | sed -e '/^[#:]/d' > /tmp/iptables.check
 
   if [ -e /tmp/itpables.check ]; then
@@ -123,7 +123,7 @@ function reset-rules () {
   echo "resetting iptables rules to default DENY"
 
   check-iptables
-  
+
   iptables  -F
 
   # Default policy is drop
@@ -139,7 +139,7 @@ function reset-rules () {
   inbound 22
 
   # Allow outgoing SSH
-  outbound 22 
+  outbound 22
 
   # Allow outbound DHCP
   outbound "67:68" ${PUBLICNET} "udp"
@@ -162,6 +162,7 @@ while [ $# -gt 0 ]; do
     --rules)
               RULESDIR="$2"
               shift
+              shift
               ;;
     --load)
               DOLOAD="yes"
@@ -179,8 +180,12 @@ while [ $# -gt 0 ]; do
               DOFLOW="yes"
               shift
               ;;
+    --net)
+              PUBLICNET="$2"
+              shift
+              shift
+              ;;
   esac
-    shift
 done
 
 if [ -n "${DORESET}" ]; then

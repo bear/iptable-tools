@@ -188,7 +188,7 @@ if [ -n "${DORESET}" ]; then
 fi
 if [ -n "${DOLOAD}" ]; then
   if [ -d "${RULESDIR}" ]; then
-    load-rules
+    load-rules "${RULESDIR}"
   else
     echo "Provided rules directory does not exist: ${RULESDIR}"
     exit 2
